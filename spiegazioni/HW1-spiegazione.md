@@ -1,178 +1,50 @@
-# Exercise 1
+# Homework 1
 
-Here is the step-by-step explanation of the implementation, linking the Python code to the mathematical theory of Gradient Descent.
+## Exercise 1
 
-### 1. Defining the Optimization Problem
 
-First, we define the mathematical landscape we want to navigate. In Machine Learning, this corresponds to the Loss Function $\mathcal{L}(\Theta)$, which measures the error of our model.
+In this exercise, we applied the Gradient Descent (GD) algorithm to the strictly convex function $\mathcal{L}(\theta) = (\theta - 3)^2 + 1$. We tested three distinct step sizes (learning rates), denoted by $\eta$, to observe their impact on the optimization trajectory.
 
-```python
-def loss_fn_1(theta):
-    return (theta - 3)**2 + 1
+### 1. Analysis of Convergence Behavior
 
-def gradient_fn_1(theta):
-    return 2 * (theta - 3)
+The simulation results highlight three distinct regimes of optimization behavior based on the choice of $\eta$:
 
-```
+- **Small Step Size ($\eta = 0.05$): Slow Convergence**
 
-- **Function Parameters & Types:**
+    shows a very smooth, monotonic trajectory. The algorithm successfully minimizes the loss, moving from the initial guess towards the optimal value $\theta^\* = 3$. However, the convergence is **slow**. The updates are tiny, requiring a large number of iterations to traverse the curve. While this approach is safe (low risk of overshooting), it is computationally inefficient.
+- **Medium Step Size ($\eta = 0.2$): Fast Convergence**
 
-- Both functions accept `theta`. In the context of the loop, `theta` is a **scalar (float)** representing the current parameter value. However, thanks to NumPy's polymorphism, `loss_fn_1` can also accept a **NumPy array**, which allows for element-wise calculation later.
-- **Code & Theory Connection:**
+    demonstrates the "sweet spot" for this specific function. The steps are large enough to cover ground quickly but small enough to remain stable. The algorithm reaches the neighborhood of the minimum in very few iterations compared to the $\eta=0.05$ case. The loss curve drops sharply and stabilizes near 1, indicating efficient convergence.
+- **Large Step Size ($\eta = 1.0$): Oscillation**
 
-- `loss_fn_1` implements the objective function $\mathcal{L}(\theta) = (\theta - 3)^2 + 1$. This is a convex function with a global minimum at $\theta = 3$.
-- `gradient_fn_1` implements the gradient $\nabla \mathcal{L}(\theta)$. Analytically, the derivative is $2(\theta - 3)$. The gradient points in the direction of the steepest ascent. To find the minimum, the algorithm must move in the opposite direction of this value.
+    illustrates a failure to converge. With $\eta = 1.0$, the algorithm enters a state of permanent **oscillation**. Instead of descending into the valley, the parameter bounces back and forth between $\theta = 0$ and $\theta = 6$. Consequently, the loss value remains constant at 10 (as seen in the Loss vs. Iteration graph) and never reaches the minimum. This is a classic example of the step size being too aggressive relative to the curvature of the function.
 
+### 2. Theoretical Connections
 
+The observed behaviors directly correlate with the theoretical properties of Gradient Descent discussed in class:
 
+#### The "Goldilocks" Principle of Step Size
 
+The results validate that the learning rate is a critical hyperparameter.
 
----
+- **Too Small:** Convergence is guaranteed for convex functions, but it takes too long.
+- **Too Large:** The updates overshoot the minimum. If the step is excessively large, the algorithm may diverge (go to infinity) or oscillate indefinitely (as seen with $\eta=1.0$).
+- **Just Right:** A tuned step size ($\eta=0.2$) balances speed and stability, leveraging the gradient information effectively to minimize the objective function rapidly.
 
-### 2. The Gradient Descent Algorithm
+#### The Role of Convexity
 
-This is the core engine. The function `GD` encapsulates the iterative logic required to minimize the loss function.
+The function $\mathcal{L}(\theta)$ is strictly convex (a quadratic bowl). Theoretically, convexity ensures that:
 
-```python
-def GD(loss_function, gradient_function, start_theta, learning_rate=0.01, n_iterations=100):
-    theta = start_theta
-    theta_history = [theta]
+1. There is a unique global minimum ($\theta^\* = 3$).
+2. The gradient always points towards this minimum.
 
-```
+However, **convexity alone guarantees convergence only if the step size is chosen correctly.** As seen in the $\eta=1.0$ case, even on a perfectly convex surface, a bad choice of step size can prevent the algorithm from ever reaching the bottom of the bowl.
 
-- **Parameters & Types:**
+#### Stability Bounds
 
-- `loss_function`, `gradient_function`: **Callables** (Python functions). This makes the code modular; you can pass any differentiable function here.
-- `start_theta`: **Float**. The initial guess $\Theta^{(0)}$.
-- `learning_rate`: **Float**. Represents $\eta$ (eta), the step size.
-- `n_iterations`: **Int**. The stopping criterion, defined as the maximum number of steps (`maxit`).
-- **Initialization:** We initialize `theta` at the starting point and create a list `theta_history` to store the trajectory.
+For a quadratic function of the form $ax^2$, the maximum stable step size is related to the Lipschitz constant of the gradient (which is determined by the curvature). In this case, $\eta=1.0$ sits exactly on the boundary of stability, leading to pure oscillation. A step size slightly larger than $1.0$ would likely cause the algorithm to **diverge** (explode towards infinity), while anything smaller than $1.0$ would eventually converge.
 
----
-
-### 3. The Iterative Update Loop
-
-We now enter the loop that performs the actual optimization steps.
-
-```python
-    for k in range(n_iterations):
-        grad = gradient_function(theta)
-        
-        theta = theta - learning_rate * grad
-        theta_history.append(theta)
-
-```
-
-
-**Code & Theory Connection:**
-
-- **Gradient Calculation:** `grad = gradient_function(theta)` computes $\nabla \mathcal{L}(\Theta^{(k)})$.
-- **The Update Rule:** The line `theta = theta - learning_rate * grad` is the direct translation of the Gradient Descent update formula found in the theory:
-
-$$\Theta^{(k+1)} = \Theta^{(k)} - \eta \nabla \mathcal{L}(\Theta^{(k)})$$
-
-- By subtracting the gradient (scaled by $\eta$), we move $\theta$ towards the minimum. If the learning rate is too small, convergence is slow; if too large, it may oscillate or diverge.
-
-
-* By subtracting the gradient (scaled by ), we move  towards the minimum. If the learning rate is too small, convergence is slow; if too large, it may oscillate or diverge.
-
-
-
-
-
----
-
-### 4. Vectorized Loss Calculation
-
-After the loop finishes, we perform a crucial optimization for efficiency and analysis.
-
-```python
-    theta_history = np.array(theta_history)
-    loss_history = loss_function(theta_history)   
-    return theta_history, loss_history
-
-```
-
-* **Code Explanation:**
-* Instead of calculating the loss value inside the loop (which would require calling the function $N$ times scalar-wise), we convert the list of positions into a NumPy array.
-* We then pass this entire array to loss_function. Thanks to NumPy's broadcasting, the mathematical operation $(\theta - 3)^2 + 1$ is applied to every element in the vector simultaneously.
-
-
-* **Return Types:** The function returns two **NumPy arrays** containing the sequence of parameters and their corresponding loss values.
-
----
-
-### 5. Execution and Hyperparameter Selection
-
-Finally, we run the algorithm using different learning rates to observe how step size affects convergence.
-
-```python
-start_theta = 0.0
-n_iter = 50
-etas = [0.05, 0.2, 1.0]
-
-results = {}
-
-for eta in etas:
-    thetas, losses = GD(loss_fn_1, gradient_fn_1, start_theta, eta, n_iter)
-    results[eta] = { 
-        'thetas': thetas,
-        'losses': losses
-    }
-
-```
-
-* **Code & Theory Connection:**
-* We define a starting point $\Theta^{(0)} = 0.0$. Since the function is convex, the choice of $\Theta^{(0)}$ is less critical as it will ideally converge to the global minimum regardless.
-
-
-* We iterate through different values of $\eta$ (`etas`). This allows us to empirically verify the theoretical behavior of step sizes:
-* Small $\eta$ (0.05) leads to slow, steady convergence.
-* Moderate $\eta$ (0.2) leads to efficient convergence.
-* Large $\eta$ (1.0) might cause the parameter to bounce back and forth around the minimum.
-
-
-
-
-* The results are stored in a dictionary to facilitate the comparison of trajectories and loss reduction over time.
-
-# Analysis of Gradient Descent Behavior Across Different Learning Rates
-
-In this section, we analyze the impact of the hyperparameter $\eta$ (learning rate) on the algorithm's ability to minimize the quadratic cost function $L(\theta) = (\theta - 3)^2$.
-
----
-
-## 2. Discussion of Results
-
-### A. Conservative Learning Rate ($\eta = 0.05$)
-* **Final Result:** $\theta \approx 2.9845$
-* **Analysis:** The algorithm shows a monotonic and very stable descent, free of oscillations. However, the step size is too small relative to the curvature of the function. After 50 iterations, the theoretical minimum ($\theta=3$) has not yet been reached.
-* **Conclusion:** This approach is safe but computationally inefficient (underestimated learning rate).
-
-### B. Balanced Learning Rate ($\eta = 0.2$)
-* **Final Result:** $\theta = 3.0000$
-* **Analysis:** This represents ideal behavior. The initial steps are large due to the high gradient, progressively reducing as the algorithm approaches the minimum. Convergence to 3.0 is achieved quickly, well before the iteration limit.
-* **Conclusion:** $\eta=0.2$ is the optimal value for this specific error surface.
-
-### C. Excessive Learning Rate ($\eta = 1.0$)
-* **Final Result:** $\theta = 0.0000$ (Stagnation)
-* **Analysis:** The Loss graph is a flat line, and the trajectory shows two fixed points on opposite sides of the parabola ($\theta=0$ and $\theta=6$).
-    * The algorithm calculates an update step so large that it entirely overshoots the minimum and lands on the opposite side of the curve, at exactly the same height (same Loss).
-    * On the next step, the opposite gradient sends it back to the starting point.
-* **Conclusion:** The algorithm has entered an infinite oscillation cycle without ever converging. This demonstrates the risks of a learning rate that is too high.
-
----
-
-## 3. Summary Table
-
-| Eta ($\eta$) | Final $\theta$ | Behavior |
-| :--- | :--- | :--- |
-| **0.05** | 2.9845 | Slow; does not reach target in 50 steps. |
-| **0.20** | **3.0000** | **Optimal Convergence.** |
-| **1.00** | 0.0000 | Persistent oscillation (Bounce). |
-
-
-# Exercise 2
+## Exercise 2
 ### Discussion of Results
 
 Based on the implemented **Gradient Descent with Backtracking** and the resulting plots, here is the analysis of the algorithm's behavior on the non-convex function $\mathcal{L}(\theta) = \theta^4 - 3\theta^2 + 2$.
@@ -200,7 +72,7 @@ A constant step size approach is highly sensitive to the scale of the gradient, 
 *   **Oscillation:** If we chose a very small constant step size to prevent divergence at the edges (e.g., $\eta = 0.001$), the convergence near the flat minima would become excruciatingly slow, requiring thousands of iterations instead of the $\approx 5$ iterations achieved here with backtracking.
 *   
 
-# Exercise 3
+## Exercise 3
 
 ### Code Explanation
 
@@ -241,7 +113,7 @@ The plot for $\eta=0.02$ (left) demonstrates the trade-off.
 *   However, because $\eta$ must be kept small (to avoid zigzagging in $\theta_2$), the movement along the shallow $\theta_1$ direction becomes extremely slow. The trajectory spends the majority of its iterations inching horizontally along the $\theta_1$ axis, demonstrating the inefficiency of GD in directions with low curvature. The convergence speed is dominated by the weakest (shallowest) direction.
 *   
 
-# Exercise 4
+## Exercise 4
 
 The plots exhibit the expected theoretical behavior for a quadratic problem:
 1.  **Left Plot:** The **Exact Line Search (Blue)** shows the characteristic "orthogonal" path where every turning point is tangent to a level set (the new gradient is orthogonal to the previous search direction). The **Backtracking (Red)** follows a similar zig-zag path but with slightly different step lengths determined by the Armijo condition.
@@ -265,7 +137,7 @@ The code solves the optimization problem for the quadratic loss $\mathcal{L}(\th
     *   **Exact Line Search:** The step sizes are **mathematically determined** and "smooth" in the sense that they follow a strict geometric rule (steps are always orthogonal to the next gradient). The trajectory looks like a clean, rigid geometric pattern.
     *   **Backtracking:** The step sizes are **discrete and adaptive**. You might notice the red path takes steps that are sometimes larger or smaller in a less predictable pattern than the blue path. This is because the step size $\eta$ depends on how many times the `while` loop runs to satisfy the Armijo condition. If the condition is met immediately with $\eta=1$, a large step is taken; if not, the step is drastically cut.
 
-# Exercise 5
+## Exercise 5
 
 ### Code Description (New Parts)
 

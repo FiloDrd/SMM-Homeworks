@@ -1,4 +1,6 @@
-# Exercise 3.1
+# Homework 3
+
+## Exercise 3.1
 **. Discussion: Why is the decision boundary linear?**
 
 - **Mathematical Justification:** Logistic Regression makes a prediction based on the probability $P(y=1|x) = \sigma(z)$, where $\sigma$ is the sigmoid function and $z = \Theta^T x$. The **decision boundary** is the threshold where the model is maximally uncertain, meaning the probability of being class 1 is exactly 0.5.
@@ -8,7 +10,7 @@
 $$\Theta^T x = \theta\_0 + \theta\_1 x\_1 + \theta\_2 x\_2 = 0$$
 - **Geometric Interpretation:** The equation above is a linear equation in the input variables $x\_1$ and $x\_2$. In 2D space, this defines a straight line. If we were in higher dimensions ($D&gt;2$), this equation would define a flat hyperplane. Therefore, despite using a non-linear activation function (sigmoid) to output probabilities, the boundary separating the classes remains linear in the feature space.
 
-# Exercise 3.2
+## Exercise 3.2
 
 ### 1. Theoretical Discussion
 
@@ -50,7 +52,7 @@ Your plots highlight a critical distinction between "convergence per epoch" and 
 
     All methods successfully reach 100% accuracy. SGD hits this target almost instantly due to the high frequency of updates, while Full GD takes a steadier, slower path.
 
-# Exercise 3.3
+## Exercise 3.3
 
 ### Discussion of Results
 

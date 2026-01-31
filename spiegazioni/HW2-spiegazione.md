@@ -1,4 +1,6 @@
-# Exercise 2.1
+# Homework 2
+
+## Exercise 2.1
 
 ### Analysis of Gradient Descent Variants
 
@@ -17,7 +19,7 @@ The batch size controls the trade-off between the accuracy of the gradient estim
 * **The "Sweet Spot":** Mini-batch GD (e.g., sizes 32, 64, 128) is usually preferred because it utilizes matrix vectorization (SIMD instructions) efficiently to speed up calculation while maintaining enough stochastic noise to generalize well.
 
 
-# Exercise 2.2
+## Exercise 2.2
 
 ### Discussion: Variance of the Stochastic Gradient
 
@@ -35,7 +37,7 @@ The batch size controls the trade-off between the accuracy of the gradient estim
 * **Convergence Efficiency:** While small batches (low stability) are noisy, they are computationally cheap and allow for many updates per second. Large batches (high stability) provide accurate updates but are expensive.
 * **The Sweet Spot (Mini-Batch):** The ideal trade-off is usually found in "Mini-Batch GD" (e.g., sizes 32 to 128). This range provides enough variance reduction to ensure stable convergence (as seen in the steep drop in your plot between sizes 1 and 20) while maintaining the computational speed of stochastic updates.
 
-# Exercise 2.3
+## Exercise 2.3
 
 ### 1. How noise helps escape shallow minima or bad regions
 
@@ -47,7 +49,7 @@ The batch size controls the trade-off between the accuracy of the gradient estim
 - **Inability to Settle:** While noise is beneficial for exploration, it becomes detrimental during the exploitation phase (fine-tuning). As seen in the plot with **High Noise (Green line)**, particularly with the larger learning rate, the trajectory behaves erratically.
 - **The "Bounce" Effect:** Near the minimum, the true gradient $\nabla \mathcal{L}$ approaches zero. However, the noise term $\epsilon\_k$ remains constant (with variance $\sigma^2=0.5$). Consequently, the update step is dominated by noise rather than the gradient signal. Instead of settling at the precise optimal point $[-1, 1]$, the parameters oscillate violently around it. This prevents the loss from stabilizing at the lowest possible value, as the algorithm constantly "overshoots" the target due to the high variance of the stochastic updates.
 
-# Exercise 2.4
+## Exercise 2.4
 
 ### 1. Why GD gives a smooth curve and SGD oscillates
 
